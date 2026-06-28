@@ -195,15 +195,29 @@
 
             <!-- 下一个方块预览 -->
             <FrameLayout
+                android:id="@+id/next_tile_preview"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_grid_cell">
                 <View
+                    android:id="@+id/next_tile_view"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
                     android:layout_gravity="center"
                     android:background="@drawable/bg_preview_tile_yellow" />
+                <TextView
+                    android:id="@+id/next_tile_text"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:textColor="@color/text_white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:text="2"
+                    android:shadowColor="#40000000"
+                    android:shadowRadius="2" />
             </FrameLayout>
 
             <!-- 弹性空间 -->
@@ -248,6 +262,7 @@
 
         <!-- ===== 棋盘容器（固定 360dp × 360dp） ===== -->
         <FrameLayout
+            android:id="@+id/board_container"
             android:layout_width="match_parent"
             android:layout_height="360dp">
 
@@ -271,28 +286,36 @@
                         android:layout_height="86dp"
                         android:orientation="horizontal">
                         <FrameLayout
+                            android:id="@+id/cell_00"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                         <FrameLayout
+                            android:id="@+id/cell_01"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                         <FrameLayout
+                            android:id="@+id/cell_02"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                         <FrameLayout
+                            android:id="@+id/cell_03"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                     </LinearLayout>
 
@@ -302,28 +325,36 @@
                         android:layout_height="86dp"
                         android:orientation="horizontal">
                         <FrameLayout
+                            android:id="@+id/cell_10"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                         <FrameLayout
+                            android:id="@+id/cell_11"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                         <FrameLayout
+                            android:id="@+id/cell_12"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                         <FrameLayout
+                            android:id="@+id/cell_13"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                     </LinearLayout>
 
@@ -333,28 +364,36 @@
                         android:layout_height="86dp"
                         android:orientation="horizontal">
                         <FrameLayout
+                            android:id="@+id/cell_20"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                         <FrameLayout
+                            android:id="@+id/cell_21"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                         <FrameLayout
+                            android:id="@+id/cell_22"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                         <FrameLayout
+                            android:id="@+id/cell_23"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                     </LinearLayout>
 
@@ -364,28 +403,36 @@
                         android:layout_height="86dp"
                         android:orientation="horizontal">
                         <FrameLayout
+                            android:id="@+id/cell_30"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                         <FrameLayout
+                            android:id="@+id/cell_31"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                         <FrameLayout
+                            android:id="@+id/cell_32"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                         <FrameLayout
+                            android:id="@+id/cell_33"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_margin="4dp"
+                            android:clickable="false"
                             android:background="@drawable/bg_grid_cell" />
                     </LinearLayout>
                 </LinearLayout>

@@ -19,4 +19,23 @@
     <color name="text_warm">#5D4E37</color>
     <color name="text_white">#FFFFFF</color>
     <color name="text_score_label">#8B7D6B</color>
+
+    <!-- 2048 方块色 -->
+    <color name="tile_16">#E8A87C</color>
+    <color name="tile_32">#E59866</color>
+    <color name="tile_64">#D35400</color>
+    <color name="tile_128">#F7DC6F</color>
+    <color name="tile_256">#F4D03F</color>
+    <color name="tile_512">#F1C40F</color>
+    <color name="tile_1024">#82E0AA</color>
+    <color name="tile_2048">#2ECC71</color>
+
+    <color name="tile_16_end">#D4956E</color>
+    <color name="tile_32_end">#D08050</color>
+    <color name="tile_64_end">#B84500</color>
+    <color name="tile_128_end">#E8C860</color>
+    <color name="tile_256_end">#E0B830</color>
+    <color name="tile_512_end">#D4A800</color>
+    <color name="tile_1024_end">#6CC898</color>
+    <color name="tile_2048_end">#24A85A</color>
 </resources>
