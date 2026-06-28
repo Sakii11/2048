@@ -15,6 +15,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -75,6 +77,10 @@ public class MainActivity extends AppCompatActivity {
     private SelectMode currentSelectMode = SelectMode.NONE;
     private int magicTargetValue = 0;
     private TextView tvSelectHint;
+
+    // 闪烁效果
+    private Handler blinkHandler;
+    private boolean blinkPhase = false;
 
     // 主题风格
     private enum Theme {
@@ -149,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
     }
     private Theme currentTheme = Theme.CLASSIC;
     private BoardScrollView scrollView;
+    private String gameMode = "free";  // 游戏模式："level" 关卡模式 / "free" 自由模式
+    private int levelTarget = 0;       // 关卡目标值（0 表示自由模式）
+    private int levelNumber = 0;       // 关卡编号（1-6）
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,6 +202,15 @@ public class MainActivity extends AppCompatActivity {
         if (mergePlayer != null) {
             mergePlayer.setVolume(0.6f, 0.6f);
         }
+
+        // 读取从登录界面传入的游戏模式
+        if (getIntent().hasExtra(LoginActivity.EXTRA_GAME_MODE)) {
+            gameMode = getIntent().getStringExtra(LoginActivity.EXTRA_GAME_MODE);
+        }
+        levelTarget = getIntent().getIntExtra("level_target", 0);
+        levelNumber = getIntent().getIntExtra("level_number", 0);
+
+        blinkHandler = new Handler(Looper.getMainLooper());
 
         // 初始化游戏
         game = new Game2048();
@@ -289,6 +307,10 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_hammer).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (levelTarget > 0) {
+                    Toast.makeText(MainActivity.this, "关卡模式不允许使用道具", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if (currentSelectMode != SelectMode.NONE) return;
                 showCustomDialog("锤子道具", "是否要使用道具消除一个方块？",
                         "确定", "取消",
@@ -300,6 +322,10 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_magic).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (levelTarget > 0) {
+                    Toast.makeText(MainActivity.this, "关卡模式不允许使用道具", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if (currentSelectMode != SelectMode.NONE) return;
                 showCustomDialog("魔法道具", "是否要使用道具变幻方块？",
                         "确定", "取消",
@@ -399,25 +425,61 @@ public class MainActivity extends AppCompatActivity {
             if (result.spawnedRow >= 0) {
                 animateSpawn(cells[result.spawnedRow][result.spawnedCol]);
             }
-            if (game.isWin()) {
-                showCustomDialog("恭喜！", "你达成了 2048！\n是否继续游戏？",
-                        "继续", "重新开始",
-                        () -> { }, // 继续游戏
-                        () -> {
-                            exitSelectMode();
-                            game.newGame();
-                            renderBoard();
-                            updateScore();
-                        });
-            } else if (game.isGameOver()) {
-                showCustomDialog("游戏结束", "没有可移动的格子了！\n得分：" + game.getScore(),
-                        "重新开始", null,
-                        () -> {
-                            exitSelectMode();
-                            game.newGame();
-                            renderBoard();
-                            updateScore();
-                        }, null);
+            // 关卡模式：检查是否已达成通关目标
+            if (levelTarget > 0) {
+                boolean reached = false;
+                for (int r = 0; r < 4; r++) {
+                    for (int c = 0; c < 4; c++) {
+                        if (game.getCell(r, c) >= levelTarget) {
+                            reached = true;
+                            break;
+                        }
+                    }
+                }
+                if (reached) {
+                    showCustomDialog("恭喜通关！",
+                            "你成功合成了 " + levelTarget + "！\n第 " + levelNumber + " 关完成！",
+                            "返回选关", null,
+                            () -> finish(),
+                            null);
+                    return;
+                }
+            } else {
+                if (game.isWin()) {
+                    showCustomDialog("恭喜！", "你达成了 2048！\n是否继续游戏？",
+                            "继续", "重新开始",
+                            () -> { }, // 继续游戏
+                            () -> {
+                                exitSelectMode();
+                                game.newGame();
+                                renderBoard();
+                                updateScore();
+                            });
+                }
+            }
+
+            if (game.isGameOver()) {
+                if (levelTarget > 0) {
+                    showCustomDialog("关卡挑战失败",
+                            "没有可移动的格子了！\n目标：" + levelTarget + "  得分：" + game.getScore(),
+                            "重试", "返回选关",
+                            () -> {
+                                exitSelectMode();
+                                game.newGame();
+                                renderBoard();
+                                updateScore();
+                            },
+                            () -> finish());
+                } else {
+                    showCustomDialog("游戏结束", "没有可移动的格子了！\n得分：" + game.getScore(),
+                            "重新开始", null,
+                            () -> {
+                                exitSelectMode();
+                                game.newGame();
+                                renderBoard();
+                                updateScore();
+                            }, null);
+                }
             }
         }
     }
@@ -624,7 +686,7 @@ public class MainActivity extends AppCompatActivity {
             tvSelectHint.setText("✨ 请点击要变幻为 " + targetValue + " 的方块");
         }
         tvSelectHint.setVisibility(View.VISIBLE);
-        // 格子始终由 boardContainer 的触摸监听器统一处理点击，不修改 clickable 状态
+        startBlinking();
     }
 
     private void onCellSelected(int row, int col) {
@@ -661,7 +723,43 @@ public class MainActivity extends AppCompatActivity {
     private void exitSelectMode() {
         tvSelectHint.setVisibility(View.GONE);
         currentSelectMode = SelectMode.NONE;
-        // 格子从未改变 clickable 状态，无需清理
+        stopBlinking();
+    }
+
+    private void startBlinking() {
+        blinkPhase = false;
+        doBlinkStep();
+    }
+
+    private void doBlinkStep() {
+        if (currentSelectMode == SelectMode.NONE) {
+            // 恢复所有格子透明度
+            for (int r = 0; r < 4; r++) {
+                for (int c = 0; c < 4; c++) {
+                    cells[r][c].setAlpha(1f);
+                }
+            }
+            return;
+        }
+        float alpha = blinkPhase ? 1f : 0.3f;
+        for (int r = 0; r < 4; r++) {
+            for (int c = 0; c < 4; c++) {
+                if (game.getCell(r, c) > 0) {
+                    cells[r][c].setAlpha(alpha);
+                }
+            }
+        }
+        blinkPhase = !blinkPhase;
+        blinkHandler.postDelayed(this::doBlinkStep, 400);
+    }
+
+    private void stopBlinking() {
+        blinkHandler.removeCallbacksAndMessages(null);
+        for (int r = 0; r < 4; r++) {
+            for (int c = 0; c < 4; c++) {
+                cells[r][c].setAlpha(1f);
+            }
+        }
     }
 
     private void showMagicValueDialog() {
@@ -932,6 +1030,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopBlinking();
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
