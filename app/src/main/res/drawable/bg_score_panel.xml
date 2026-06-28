@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 阴影层 -->
+    <item android:bottom="2dp" android:right="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#20000000" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+    <!-- 主体 -->
+    <item android:bottom="1dp" android:right="1dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#F0E8DC"
+                android:endColor="@color/score_panel_bg"
+                android:angle="270" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+</layer-list>

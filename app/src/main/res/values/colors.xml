@@ -2,4 +2,21 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- 莫兰迪暖色系 -->
+    <color name="cream_gradient_start">#F5E6D3</color>
+    <color name="cream_gradient_end">#FDF3E7</color>
+    <color name="tile_yellow_2">#F2D08A</color>
+    <color name="tile_orange_0">#F0B27A</color>
+    <color name="tile_brown_4">#A0724E</color>
+    <color name="tile_light_orange_8">#F5CBA7</color>
+    <color name="grid_bg">#C4B5A5</color>
+    <color name="grid_cell">#FDF5E6</color>
+    <color name="score_panel_bg">#E8DED1</color>
+    <color name="btn_undo">#E07B6C</color>
+    <color name="btn_hammer">#A0724E</color>
+    <color name="btn_magic">#7BA7C9</color>
+    <color name="text_warm">#5D4E37</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_score_label">#8B7D6B</color>
 </resources>
