@@ -1,18 +1,22 @@
 package com.example.myapplication;
 
+import android.app.Dialog;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -36,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
     private float startX, startY;
     private static final int SWIPE_THRESHOLD = 50;
 
+    private MediaPlayer mediaPlayer;
+    private boolean isMusicPlaying = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         bestScore = prefs.getInt(KEY_BEST, 0);
         tvBest.setText(String.valueOf(bestScore));
+
+        // 初始化 MediaPlayer
+        mediaPlayer = MediaPlayer.create(this, R.raw.game_music);
+        mediaPlayer.setLooping(true);
 
         // 初始化游戏
         game = new Game2048();
@@ -96,9 +107,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (game.canUndo()) {
-                    game.undo();
-                    renderBoard();
-                    updateScore();
+                    showCustomDialog("撤回", "确定要撤回上一步吗？",
+                            "确定", "取消",
+                            () -> {
+                                game.undo();
+                                renderBoard();
+                                updateScore();
+                            }, null);
                 }
             }
         });
@@ -106,16 +121,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_settings).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("2048")
-                        .setMessage("重新开始游戏？")
-                        .setPositiveButton("确定", (dialog, which) -> {
-                            game.newGame();
-                            renderBoard();
-                            updateScore();
-                        })
-                        .setNegativeButton("取消", null)
-                        .show();
+                showSettingsDialog();
             }
         });
 
@@ -183,30 +189,22 @@ public class MainActivity extends AppCompatActivity {
                 animateSpawn(cells[result.spawnedRow][result.spawnedCol]);
             }
             if (game.isWin()) {
-                new AlertDialog.Builder(this)
-                        .setTitle("恭喜！")
-                        .setMessage("你达成了 2048！\n是否继续游戏？")
-                        .setPositiveButton("继续", (dialog, which) -> {
-                            game.move(direction); // 无效操作，仅为清除 win 状态
-                        })
-                        .setNegativeButton("重新开始", (dialog, which) -> {
+                showCustomDialog("恭喜！", "你达成了 2048！\n是否继续游戏？",
+                        "继续", "重新开始",
+                        () -> { }, // 继续游戏
+                        () -> {
                             game.newGame();
                             renderBoard();
                             updateScore();
-                        })
-                        .setCancelable(false)
-                        .show();
+                        });
             } else if (game.isGameOver()) {
-                new AlertDialog.Builder(this)
-                        .setTitle("游戏结束")
-                        .setMessage("没有可移动的格子了！\n得分：" + game.getScore())
-                        .setPositiveButton("重新开始", (dialog, which) -> {
+                showCustomDialog("游戏结束", "没有可移动的格子了！\n得分：" + game.getScore(),
+                        "重新开始", null,
+                        () -> {
                             game.newGame();
                             renderBoard();
                             updateScore();
-                        })
-                        .setCancelable(false)
-                        .show();
+                        }, null);
             }
         }
     }
@@ -306,5 +304,85 @@ public class MainActivity extends AppCompatActivity {
                             .start();
                 })
                 .start();
+    }
+
+    private void showSettingsDialog() {
+        Dialog dialog = new Dialog(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_settings, null);
+        dialog.setContentView(view);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        ImageButton btnVoice = view.findViewById(R.id.dialog_btn_voice);
+        ImageButton btnRestart = view.findViewById(R.id.dialog_btn_restart);
+
+        btnVoice.setOnClickListener(v -> {
+            if (isMusicPlaying) {
+                mediaPlayer.pause();
+                btnVoice.setImageResource(R.drawable.ic_voice_close);
+                Toast.makeText(MainActivity.this, "音乐已关闭", Toast.LENGTH_SHORT).show();
+            } else {
+                mediaPlayer.start();
+                btnVoice.setImageResource(R.drawable.ic_voice);
+                Toast.makeText(MainActivity.this, "音乐已开启", Toast.LENGTH_SHORT).show();
+            }
+            isMusicPlaying = !isMusicPlaying;
+        });
+
+        btnRestart.setOnClickListener(v -> {
+            dialog.dismiss();
+            showCustomDialog("2048", "重新开始游戏？",
+                    "确定", "取消",
+                    () -> {
+                        game.newGame();
+                        renderBoard();
+                        updateScore();
+                    }, null);
+        });
+
+        dialog.show();
+    }
+
+    private void showCustomDialog(String title, String message,
+            String positiveText, String negativeText,
+            Runnable onPositive, Runnable onNegative) {
+        Dialog dialog = new Dialog(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_confirm, null);
+        dialog.setContentView(view);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        TextView tvTitle = view.findViewById(R.id.dialog_title);
+        TextView tvMessage = view.findViewById(R.id.dialog_message);
+        Button btnPositive = view.findViewById(R.id.dialog_btn_positive);
+        Button btnNegative = view.findViewById(R.id.dialog_btn_negative);
+
+        tvTitle.setText(title);
+        tvMessage.setText(message);
+        btnPositive.setText(positiveText);
+
+        if (negativeText != null) {
+            btnNegative.setText(negativeText);
+            btnNegative.setOnClickListener(v -> {
+                dialog.dismiss();
+                if (onNegative != null) onNegative.run();
+            });
+        } else {
+            btnNegative.setVisibility(View.GONE);
+        }
+
+        btnPositive.setOnClickListener(v -> {
+            dialog.dismiss();
+            onPositive.run();
+        });
+
+        dialog.show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 }
