@@ -26,6 +26,8 @@
             android:padding="16dp">
 
             <!-- 2×2 迷你数字预览方块 -->
+
+            <!-- 弹性空间 -->
             <GridLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -38,16 +40,17 @@
                     android:layout_height="60dp"
                     android:layout_margin="3dp"
                     android:background="@drawable/bg_preview_tile_yellow">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:shadowColor="#40000000"
+                        android:shadowRadius="2"
                         android:text="2"
                         android:textColor="@color/text_white"
                         android:textSize="22sp"
-                        android:textStyle="bold"
-                        android:shadowColor="#40000000"
-                        android:shadowRadius="2" />
+                        android:textStyle="bold" />
                 </FrameLayout>
 
                 <!-- 橙色 0 -->
@@ -56,16 +59,17 @@
                     android:layout_height="60dp"
                     android:layout_margin="3dp"
                     android:background="@drawable/bg_preview_tile_orange">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:shadowColor="#40000000"
+                        android:shadowRadius="2"
                         android:text="0"
                         android:textColor="@color/text_white"
                         android:textSize="22sp"
-                        android:textStyle="bold"
-                        android:shadowColor="#40000000"
-                        android:shadowRadius="2" />
+                        android:textStyle="bold" />
                 </FrameLayout>
 
                 <!-- 深棕 4 -->
@@ -74,16 +78,17 @@
                     android:layout_height="60dp"
                     android:layout_margin="3dp"
                     android:background="@drawable/bg_preview_tile_brown">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:shadowColor="#40000000"
+                        android:shadowRadius="2"
                         android:text="4"
                         android:textColor="@color/text_white"
                         android:textSize="22sp"
-                        android:textStyle="bold"
-                        android:shadowColor="#40000000"
-                        android:shadowRadius="2" />
+                        android:textStyle="bold" />
                 </FrameLayout>
 
                 <!-- 浅橙 8 -->
@@ -92,20 +97,20 @@
                     android:layout_height="60dp"
                     android:layout_margin="3dp"
                     android:background="@drawable/bg_preview_tile_light_orange">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:shadowColor="#40000000"
+                        android:shadowRadius="1"
                         android:text="8"
                         android:textColor="@color/text_warm"
                         android:textSize="22sp"
-                        android:textStyle="bold"
-                        android:shadowColor="#40000000"
-                        android:shadowRadius="1" />
+                        android:textStyle="bold" />
                 </FrameLayout>
             </GridLayout>
 
-            <!-- 弹性空间 -->
             <Space
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -287,178 +292,11 @@
             android:layout_width="match_parent"
             android:layout_height="360dp">
 
-            <FrameLayout
-                android:id="@+id/board_frame"
+            <com.example.myapplication.BoardView
+                android:id="@+id/board_view"
                 android:layout_width="360dp"
                 android:layout_height="360dp"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_grid_board"
-                android:padding="8dp">
-
-                <!-- 用 LinearLayout 嵌套替代 GridLayout，避免 9 宫格 bug -->
-                <LinearLayout
-                    android:id="@+id/grid_board"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <!-- 第1行 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="86dp"
-                        android:orientation="horizontal">
-                        <FrameLayout
-                            android:id="@+id/cell_00"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                        <FrameLayout
-                            android:id="@+id/cell_01"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                        <FrameLayout
-                            android:id="@+id/cell_02"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                        <FrameLayout
-                            android:id="@+id/cell_03"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                    </LinearLayout>
-
-                    <!-- 第2行 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="86dp"
-                        android:orientation="horizontal">
-                        <FrameLayout
-                            android:id="@+id/cell_10"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                        <FrameLayout
-                            android:id="@+id/cell_11"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                        <FrameLayout
-                            android:id="@+id/cell_12"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                        <FrameLayout
-                            android:id="@+id/cell_13"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                    </LinearLayout>
-
-                    <!-- 第3行 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="86dp"
-                        android:orientation="horizontal">
-                        <FrameLayout
-                            android:id="@+id/cell_20"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                        <FrameLayout
-                            android:id="@+id/cell_21"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                        <FrameLayout
-                            android:id="@+id/cell_22"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                        <FrameLayout
-                            android:id="@+id/cell_23"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                    </LinearLayout>
-
-                    <!-- 第4行 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="86dp"
-                        android:orientation="horizontal">
-                        <FrameLayout
-                            android:id="@+id/cell_30"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                        <FrameLayout
-                            android:id="@+id/cell_31"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                        <FrameLayout
-                            android:id="@+id/cell_32"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                        <FrameLayout
-                            android:id="@+id/cell_33"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_margin="4dp"
-                            android:clickable="false"
-                            android:background="@drawable/bg_grid_cell" />
-                    </LinearLayout>
-                </LinearLayout>
-            </FrameLayout>
+                android:layout_gravity="center" />
         </FrameLayout>
 
         <!-- ===== 底部工具栏 ===== -->
