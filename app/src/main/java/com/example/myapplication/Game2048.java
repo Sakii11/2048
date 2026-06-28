@@ -232,6 +232,28 @@ public class Game2048 {
         return true;
     }
 
+    /**
+     * 锤子道具：移除指定位置的方块（支持撤回）
+     */
+    public boolean removeTile(int row, int col) {
+        if (board[row][col] == 0) return false;
+        int[][] oldBoard = copyBoard();
+        history.push(new GameState(oldBoard, score));
+        board[row][col] = 0;
+        return true;
+    }
+
+    /**
+     * 魔法道具：将指定方块变幻为目标值（支持撤回）
+     */
+    public boolean transformTile(int row, int col, int newValue) {
+        if (board[row][col] == 0) return false;
+        int[][] oldBoard = copyBoard();
+        history.push(new GameState(oldBoard, score));
+        board[row][col] = newValue;
+        return true;
+    }
+
     public int getCell(int row, int col) {
         return board[row][col];
     }

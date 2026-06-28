@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private Game2048 game;
     private FrameLayout[][] cells;
     private TextView[][] tileTexts;
+    private FrameLayout boardContainer;
     private TextView tvScore;
     private TextView tvBest;
     private int bestScore;
@@ -38,10 +40,18 @@ public class MainActivity extends AppCompatActivity {
     private TextView nextTileText;
 
     private float startX, startY;
+    private float selectStartX, selectStartY;
     private static final int SWIPE_THRESHOLD = 50;
 
     private MediaPlayer mediaPlayer;
+    private MediaPlayer mergePlayer;
     private boolean isMusicPlaying = false;
+
+    // 道具选择模式
+    private enum SelectMode { NONE, HAMMER, MAGIC }
+    private SelectMode currentSelectMode = SelectMode.NONE;
+    private int magicTargetValue = 0;
+    private TextView tvSelectHint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,22 +73,62 @@ public class MainActivity extends AppCompatActivity {
         bestScore = prefs.getInt(KEY_BEST, 0);
         tvBest.setText(String.valueOf(bestScore));
 
-        // 初始化 MediaPlayer
+        // 初始化背景音乐播放器，不在此处启动（等 onResume 时 AudioManager 就绪再播）
         mediaPlayer = MediaPlayer.create(this, R.raw.game_music);
-        mediaPlayer.setLooping(true);
+        if (mediaPlayer != null) {
+            mediaPlayer.setLooping(true);
+        }
+        isMusicPlaying = true; // 默认开启，onResume 时根据此标志恢复播放
+
+        // 初始化合成音效播放器（独立实例，与背景音乐互不干扰）
+        mergePlayer = MediaPlayer.create(this, R.raw.merge_sound);
+        if (mergePlayer != null) {
+            mergePlayer.setVolume(0.6f, 0.6f);
+        }
 
         // 初始化游戏
         game = new Game2048();
         nextTileView = findViewById(R.id.next_tile_view);
         nextTileText = findViewById(R.id.next_tile_text);
+        tvSelectHint = findViewById(R.id.tv_select_hint);
         initCells();
         renderBoard();
 
         // 设置棋盘触摸监听
-        FrameLayout boardContainer = findViewById(R.id.board_container);
+        boardContainer = findViewById(R.id.board_container);
+
+        // 将棋盘容器告知自定义 BoardScrollView，使其在棋盘区域内永不拦截触摸事件
+        BoardScrollView scrollView = (BoardScrollView) findViewById(R.id.scroll_view);
+        scrollView.setBoardContainer(boardContainer);
+
         boardContainer.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                // === 道具选择模式：由触摸监听器统一处理方块点击，不再修改格子 clickable 状态 ===
+                if (currentSelectMode != SelectMode.NONE) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            selectStartX = event.getX();
+                            selectStartY = event.getY();
+                            return true;
+                        case MotionEvent.ACTION_UP: {
+                            float dx2 = Math.abs(event.getX() - selectStartX);
+                            float dy2 = Math.abs(event.getY() - selectStartY);
+                            // 只有轻触（位移极小）才视为点击选格，滑动则忽略
+                            if (dx2 < 30 && dy2 < 30) {
+                                int[] cell = findCellFromTouch(event);
+                                if (cell != null) {
+                                    onCellSelected(cell[0], cell[1]);
+                                }
+                            }
+                            return true;
+                        }
+                        default:
+                            return true;
+                    }
+                }
+
+                // === 正常模式：处理滑动手势 ===
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         startX = event.getX();
@@ -97,8 +147,10 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                         return true;
+                    default:
+                        // 消费 ACTION_MOVE 等事件，防止冒泡回 ScrollView 触发滚动
+                        return true;
                 }
-                return false;
             }
         });
 
@@ -128,16 +180,47 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_hammer).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "锤子道具：移除一个方块", Toast.LENGTH_SHORT).show();
+                if (currentSelectMode != SelectMode.NONE) return;
+                showCustomDialog("锤子道具", "是否要使用道具消除一个方块？",
+                        "确定", "取消",
+                        () -> enterSelectMode(SelectMode.HAMMER, 0),
+                        null);
             }
         });
 
         findViewById(R.id.btn_magic).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "魔法道具：翻倍最大方块", Toast.LENGTH_SHORT).show();
+                if (currentSelectMode != SelectMode.NONE) return;
+                showCustomDialog("魔法道具", "是否要使用道具变幻方块？",
+                        "确定", "取消",
+                        () -> showMagicValueDialog(),
+                        null);
             }
         });
+    }
+
+    /**
+     * 根据触摸事件的屏幕绝对坐标，找到被点击的格子。
+     * 使用 getLocationOnScreen 避免坐标系转换问题。
+     */
+    private int[] findCellFromTouch(MotionEvent event) {
+        float rawX = event.getRawX();
+        float rawY = event.getRawY();
+        for (int r = 0; r < 4; r++) {
+            for (int c = 0; c < 4; c++) {
+                int[] loc = new int[2];
+                cells[r][c].getLocationOnScreen(loc);
+                int left = loc[0];
+                int top = loc[1];
+                int right = left + cells[r][c].getWidth();
+                int bottom = top + cells[r][c].getHeight();
+                if (rawX >= left && rawX <= right && rawY >= top && rawY <= bottom) {
+                    return new int[]{r, c};
+                }
+            }
+        }
+        return null;
     }
 
     private void initCells() {
@@ -176,12 +259,17 @@ public class MainActivity extends AppCompatActivity {
             updateScore();
 
             // 合并方块动画
+            boolean hasMerged = false;
             for (int r = 0; r < 4; r++) {
                 for (int c = 0; c < 4; c++) {
                     if (result.mergedAt[r][c] != 0) {
                         animateMerge(cells[r][c]);
+                        hasMerged = true;
                     }
                 }
+            }
+            if (hasMerged) {
+                playMergeSound();
             }
 
             // 新方块出现动画
@@ -193,6 +281,7 @@ public class MainActivity extends AppCompatActivity {
                         "继续", "重新开始",
                         () -> { }, // 继续游戏
                         () -> {
+                            exitSelectMode();
                             game.newGame();
                             renderBoard();
                             updateScore();
@@ -201,6 +290,7 @@ public class MainActivity extends AppCompatActivity {
                 showCustomDialog("游戏结束", "没有可移动的格子了！\n得分：" + game.getScore(),
                         "重新开始", null,
                         () -> {
+                            exitSelectMode();
                             game.newGame();
                             renderBoard();
                             updateScore();
@@ -333,6 +423,7 @@ public class MainActivity extends AppCompatActivity {
             showCustomDialog("2048", "重新开始游戏？",
                     "确定", "取消",
                     () -> {
+                        exitSelectMode();
                         game.newGame();
                         renderBoard();
                         updateScore();
@@ -377,12 +468,132 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    // ===== 道具选择模式 =====
+
+    private void enterSelectMode(SelectMode mode, int targetValue) {
+        currentSelectMode = mode;
+        magicTargetValue = targetValue;
+
+        if (mode == SelectMode.HAMMER) {
+            tvSelectHint.setText("🔨 请点击要消除的方块");
+        } else {
+            tvSelectHint.setText("✨ 请点击要变幻为 " + targetValue + " 的方块");
+        }
+        tvSelectHint.setVisibility(View.VISIBLE);
+        // 格子始终由 boardContainer 的触摸监听器统一处理点击，不修改 clickable 状态
+    }
+
+    private void onCellSelected(int row, int col) {
+        int value = game.getCell(row, col);
+        if (value == 0) {
+            Toast.makeText(this, "请选择一个有效的方块", Toast.LENGTH_SHORT).show();
+            // 选中了无效方块也退出选择模式，防止状态卡住
+            exitSelectMode();
+            return;
+        }
+
+        boolean success = false;
+        if (currentSelectMode == SelectMode.HAMMER) {
+            success = game.removeTile(row, col);
+        } else if (currentSelectMode == SelectMode.MAGIC) {
+            success = game.transformTile(row, col, magicTargetValue);
+        }
+
+        if (success) {
+            SelectMode completedMode = currentSelectMode;
+            exitSelectMode();
+            renderBoard();
+            updateScore();
+            Toast.makeText(this,
+                    completedMode == SelectMode.HAMMER ? "方块已消除" : "方块已变幻",
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            // 操作失败也退出选择模式，防止状态卡住
+            exitSelectMode();
+            Toast.makeText(this, "操作失败，请重试", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void exitSelectMode() {
+        tvSelectHint.setVisibility(View.GONE);
+        currentSelectMode = SelectMode.NONE;
+        // 格子从未改变 clickable 状态，无需清理
+    }
+
+    private void showMagicValueDialog() {
+        Dialog dialog = new Dialog(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_magic_select, null);
+        dialog.setContentView(view);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        int[] values = {2, 4, 8, 16, 32};
+        int[] btnIds = {R.id.magic_btn_2, R.id.magic_btn_4, R.id.magic_btn_8,
+                R.id.magic_btn_16, R.id.magic_btn_32};
+
+        for (int i = 0; i < values.length; i++) {
+            final int val = values[i];
+            view.findViewById(btnIds[i]).setOnClickListener(v -> {
+                dialog.dismiss();
+                enterSelectMode(SelectMode.MAGIC, val);
+            });
+        }
+
+        view.findViewById(R.id.magic_btn_cancel).setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void playMergeSound() {
+        if (mergePlayer != null) {
+            mergePlayer.seekTo(0);
+            mergePlayer.start();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (currentSelectMode != SelectMode.NONE) {
+            exitSelectMode();
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // 回到前台时恢复背景音乐（仅当用户未手动关闭时）
+        if (isMusicPlaying && mediaPlayer != null && !mediaPlayer.isPlaying()) {
+            mediaPlayer.start();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // 切到后台时暂停音乐，回来时 onResume 自动恢复
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (currentSelectMode != SelectMode.NONE) {
+            exitSelectMode();
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
+        }
+        if (mergePlayer != null) {
+            mergePlayer.release();
+            mergePlayer = null;
         }
     }
 }

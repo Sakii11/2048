@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.example.myapplication.BoardScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_gradient"
@@ -260,6 +261,22 @@
                 android:src="@drawable/ic_magic" />
         </LinearLayout>
 
+        <!-- 选择模式提示文字（默认隐藏） -->
+        <TextView
+            android:id="@+id/tv_select_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/bg_score_panel"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:textColor="@color/text_warm"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
         <!-- ===== 棋盘容器（固定 360dp × 360dp） ===== -->
         <FrameLayout
             android:id="@+id/board_container"
@@ -469,4 +486,4 @@
         </LinearLayout>
 
     </LinearLayout>
-</ScrollView>
+</com.example.myapplication.BoardScrollView>
