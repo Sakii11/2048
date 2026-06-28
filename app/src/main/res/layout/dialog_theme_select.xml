@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="选择风格"
+            android:textColor="@color/text_warm"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
+            android:layout_gravity="center_horizontal" />
+
+        <!-- 经典奶油 -->
+        <LinearLayout
+            android:id="@+id/theme_classic"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_theme_item"
+            android:clickable="true"
+            android:focusable="true">
+            <View
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_theme_preview_classic" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="经典奶油"
+                android:textColor="@color/text_warm"
+                android:textSize="15sp" />
+            <View
+                android:id="@+id/theme_check_classic"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/ic_theme_check"
+                android:visibility="visible" />
+        </LinearLayout>
+
+        <!-- 暗夜模式 -->
+        <LinearLayout
+            android:id="@+id/theme_dark"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_theme_item"
+            android:clickable="true"
+            android:focusable="true">
+            <View
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_theme_preview_dark" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="暗夜模式"
+                android:textColor="@color/text_warm"
+                android:textSize="15sp" />
+            <View
+                android:id="@+id/theme_check_dark"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/ic_theme_check"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- 海洋微风 -->
+        <LinearLayout
+            android:id="@+id/theme_ocean"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_theme_item"
+            android:clickable="true"
+            android:focusable="true">
+            <View
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_theme_preview_ocean" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="海洋微风"
+                android:textColor="@color/text_warm"
+                android:textSize="15sp" />
+            <View
+                android:id="@+id/theme_check_ocean"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/ic_theme_check"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- 樱花物语 -->
+        <LinearLayout
+            android:id="@+id/theme_sakura"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_theme_item"
+            android:clickable="true"
+            android:focusable="true">
+            <View
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_theme_preview_sakura" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="樱花物语"
+                android:textColor="@color/text_warm"
+                android:textSize="15sp" />
+            <View
+                android:id="@+id/theme_check_sakura"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/ic_theme_check"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- 森林绿意 -->
+        <LinearLayout
+            android:id="@+id/theme_forest"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_theme_item"
+            android:clickable="true"
+            android:focusable="true">
+            <View
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_theme_preview_forest" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="森林绿意"
+                android:textColor="@color/text_warm"
+                android:textSize="15sp" />
+            <View
+                android:id="@+id/theme_check_forest"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/ic_theme_check"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- 日落暖橙 -->
+        <LinearLayout
+            android:id="@+id/theme_sunset"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:background="@drawable/bg_theme_item"
+            android:clickable="true"
+            android:focusable="true">
+            <View
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_theme_preview_sunset" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="日落暖橙"
+                android:textColor="@color/text_warm"
+                android:textSize="15sp" />
+            <View
+                android:id="@+id/theme_check_sunset"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/ic_theme_check"
+                android:visibility="gone" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

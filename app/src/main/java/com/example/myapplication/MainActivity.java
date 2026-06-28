@@ -1,11 +1,21 @@
 package com.example.myapplication;
 
 import android.app.Dialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,7 +29,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 import com.example.myapplication.Game2048.Direction;
 import com.example.myapplication.Game2048.MoveResult;
@@ -28,16 +43,24 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "game2048_prefs";
     private static final String KEY_BEST = "best_score";
+    private static final String KEY_THEME = "app_theme";
+    private static final int REQUEST_WRITE_STORAGE = 100;
 
     private Game2048 game;
     private FrameLayout[][] cells;
     private TextView[][] tileTexts;
     private FrameLayout boardContainer;
+    private FrameLayout boardFrame;
+    private FrameLayout scorePanelCurrent;
+    private FrameLayout scorePanelBest;
     private TextView tvScore;
     private TextView tvBest;
+    private TextView tvScoreLabel;
+    private TextView tvBestLabel;
     private int bestScore;
     private View nextTileView;
     private TextView nextTileText;
+    private Bitmap capturedBitmap;
 
     private float startX, startY;
     private float selectStartX, selectStartY;
@@ -53,6 +76,80 @@ public class MainActivity extends AppCompatActivity {
     private int magicTargetValue = 0;
     private TextView tvSelectHint;
 
+    // 主题风格
+    private enum Theme {
+        CLASSIC("经典奶油", 0xFFF5E6D3, 0xFFE8D5B7,
+                0xFFC4B5A5, 0xFFFDF5E6, 0xFFE8DED1, 0xFF5D4E37, 0xFF8B7D6B),
+        DARK("暗夜模式", 0xFF2D2D3F, 0xFF1A1A2E,
+                0xFF1A1A2E, 0xFF252540, 0xFF1E1E30, 0xFFCCCCCC, 0xFF888888),
+        OCEAN("海洋微风", 0xFFB8D4E3, 0xFF7BA7BC,
+                0xFF6C8D9A, 0xFFE8F2F5, 0xFFD0E4ED, 0xFF3D5A6B, 0xFF5C7D8A),
+        SAKURA("樱花物语", 0xFFFFD1DC, 0xFFFFB7C5,
+                0xFFC4959D, 0xFFFFF0F3, 0xFFFFE4EA, 0xFF7D5A60, 0xFF9B7D82),
+        FOREST("森林绿意", 0xFFC8E6C9, 0xFF81C784,
+                0xFF8DA892, 0xFFF0F5F1, 0xFFD8E9DA, 0xFF4A6B50, 0xFF6B8A70),
+        SUNSET("日落暖橙", 0xFFFFCCBC, 0xFFFF8A65,
+                0xFFC49A7D, 0xFFFFF5F0, 0xFFFFEBE0, 0xFF7D5038, 0xFF9B6D55);
+
+        final String label;
+        final int colorStart;   // 主背景渐变起始
+        final int colorEnd;     // 主背景渐变结束
+        final int gridBg;       // 棋盘底色
+        final int gridCell;     // 空格子底色
+        final int scorePanelBg; // 分数面板底色
+        final int textWarm;     // 暖色文字（标签/方块数字）
+        final int textLabel;    // 灰色文字（"分数""最佳"标签）
+
+        Theme(String label, int colorStart, int colorEnd,
+              int gridBg, int gridCell, int scorePanelBg, int textWarm, int textLabel) {
+            this.label = label;
+            this.colorStart = colorStart;
+            this.colorEnd = colorEnd;
+            this.gridBg = gridBg;
+            this.gridCell = gridCell;
+            this.scorePanelBg = scorePanelBg;
+            this.textWarm = textWarm;
+            this.textLabel = textLabel;
+        }
+
+        /** 经典方块配色（CLASSIC / OCEAN / SAKURA / FOREST / SUNSET 共用） */
+        static final int[] CLASSIC_TILE_START = {
+                0xFFF2D08A, 0xFFF0B27A, 0xFFA0724E, 0xFFF5CBA7,
+                0xFFE8A87C, 0xFFE59866, 0xFFD35400,
+                0xFFF7DC6F, 0xFFF4D03F, 0xFFF1C40F,
+                0xFF82E0AA, 0xFF2ECC71
+        };
+        static final int[] CLASSIC_TILE_END = {
+                0xFFD9B870, 0xFFD89860, 0xFF805030, 0xFFD8B090,
+                0xFFD4956E, 0xFFD08050, 0xFFB84500,
+                0xFFE8C860, 0xFFE0B830, 0xFFD4A800,
+                0xFF6CC898, 0xFF24A85A
+        };
+
+        /** 暗夜方块配色 */
+        static final int[] DARK_TILE_START = {
+                0xFFC9A85C, 0xFFC88050, 0xFF805030, 0xFFD0A060,
+                0xFFC07040, 0xFFA04000, 0xFF882200,
+                0xFFD4B850, 0xFFCCB030, 0xFFCCA000,
+                0xFF60C080, 0xFF20A040
+        };
+        static final int[] DARK_TILE_END = {
+                0xFFB09040, 0xFFB06838, 0xFF603820, 0xFFB88848,
+                0xFFA85830, 0xFF882800, 0xFF6E1800,
+                0xFFC0A040, 0xFFB89820, 0xFFB08800,
+                0xFF48A868, 0xFF18882E
+        };
+
+        public int[] getTileStartColors() {
+            return this == DARK ? DARK_TILE_START : CLASSIC_TILE_START;
+        }
+        public int[] getTileEndColors() {
+            return this == DARK ? DARK_TILE_END : CLASSIC_TILE_END;
+        }
+    }
+    private Theme currentTheme = Theme.CLASSIC;
+    private BoardScrollView scrollView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,11 +164,22 @@ public class MainActivity extends AppCompatActivity {
         // 初始化 UI 引用
         tvScore = findViewById(R.id.tv_score);
         tvBest = findViewById(R.id.tv_best);
+        tvScoreLabel = findViewById(R.id.tv_score_label);
+        tvBestLabel = findViewById(R.id.tv_best_label);
+        boardFrame = findViewById(R.id.board_frame);
+        scorePanelCurrent = findViewById(R.id.score_panel_current);
+        scorePanelBest = findViewById(R.id.score_panel_best);
 
-        // 加载最佳分数
+        // 加载最佳分数和主题
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         bestScore = prefs.getInt(KEY_BEST, 0);
         tvBest.setText(String.valueOf(bestScore));
+        String savedTheme = prefs.getString(KEY_THEME, "CLASSIC");
+        try {
+            currentTheme = Theme.valueOf(savedTheme);
+        } catch (IllegalArgumentException e) {
+            currentTheme = Theme.CLASSIC;
+        }
 
         // 初始化背景音乐播放器，不在此处启动（等 onResume 时 AudioManager 就绪再播）
         mediaPlayer = MediaPlayer.create(this, R.raw.game_music);
@@ -98,8 +206,9 @@ public class MainActivity extends AppCompatActivity {
         boardContainer = findViewById(R.id.board_container);
 
         // 将棋盘容器告知自定义 BoardScrollView，使其在棋盘区域内永不拦截触摸事件
-        BoardScrollView scrollView = (BoardScrollView) findViewById(R.id.scroll_view);
+        scrollView = (BoardScrollView) findViewById(R.id.scroll_view);
         scrollView.setBoardContainer(boardContainer);
+        applyTheme(currentTheme);
 
         boardContainer.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -198,6 +307,20 @@ public class MainActivity extends AppCompatActivity {
                         null);
             }
         });
+
+        // 截图上传按钮
+        findViewById(R.id.btn_upload).setOnClickListener(v -> {
+            Bitmap screenshot = captureScreenshot();
+            if (screenshot != null) {
+                capturedBitmap = screenshot;
+                showSaveScreenshotDialog();
+            } else {
+                Toast.makeText(MainActivity.this, "截图失败，请重试", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // 服装风格切换按钮
+        findViewById(R.id.btn_clothing).setOnClickListener(v -> showThemeDialog());
     }
 
     /**
@@ -309,11 +432,11 @@ public class MainActivity extends AppCompatActivity {
                 if (value == 0) {
                     tv.setText("");
                     tv.setVisibility(View.INVISIBLE);
-                    cell.setBackgroundResource(R.drawable.bg_grid_cell);
+                    cell.setBackground(createGridCellBackground());
                 } else {
                     tv.setText(String.valueOf(value));
                     tv.setVisibility(View.VISIBLE);
-                    cell.setBackgroundResource(getTileBackground(value));
+                    cell.setBackground(getTileDrawable(value));
 
                     // 调整字体大小
                     if (value >= 1024) {
@@ -324,11 +447,11 @@ public class MainActivity extends AppCompatActivity {
                         tv.setTextSize(22);
                     }
 
-                    // 大数字用深色文字
+                    // 方块数字颜色：浅色方块用白色字，大数字用暖色字
                     if (value >= 128) {
-                        tv.setTextColor(ContextCompat.getColor(this, R.color.text_warm));
+                        tv.setTextColor(currentTheme.textWarm);
                     } else {
-                        tv.setTextColor(ContextCompat.getColor(this, R.color.text_white));
+                        tv.setTextColor(Color.WHITE);
                     }
                 }
             }
@@ -336,21 +459,42 @@ public class MainActivity extends AppCompatActivity {
         updateNextTilePreview();
     }
 
-    private int getTileBackground(int value) {
-        switch (value) {
-            case 2: return R.drawable.bg_preview_tile_yellow;
-            case 4: return R.drawable.bg_preview_tile_orange;
-            case 8: return R.drawable.bg_preview_tile_light_orange;
-            case 16: return R.drawable.bg_tile_16;
-            case 32: return R.drawable.bg_tile_32;
-            case 64: return R.drawable.bg_tile_64;
-            case 128: return R.drawable.bg_tile_128;
-            case 256: return R.drawable.bg_tile_256;
-            case 512: return R.drawable.bg_tile_512;
-            case 1024: return R.drawable.bg_tile_1024;
-            case 2048: return R.drawable.bg_tile_2048;
-            default: return R.drawable.bg_tile_2048; // 超大值
-        }
+    private int getTileColorIndex(int value) {
+        int exp = 0;
+        int v = value;
+        while (v > 1) { v /= 2; exp++; }
+        return Math.min(exp - 1, 10);
+    }
+
+    private GradientDrawable getTileDrawable(int value) {
+        int idx = getTileColorIndex(value);
+        int[] startColors = currentTheme.getTileStartColors();
+        int[] endColors = currentTheme.getTileEndColors();
+        int start = startColors[Math.min(idx, startColors.length - 1)];
+        int end = endColors[Math.min(idx, endColors.length - 1)];
+        GradientDrawable gd = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR, new int[]{start, end});
+        gd.setCornerRadius(dpToPx(12));
+        return gd;
+    }
+
+    private GradientDrawable createGridCellBackground() {
+        GradientDrawable gd = new GradientDrawable();
+        gd.setColor(currentTheme.gridCell);
+        gd.setCornerRadius(dpToPx(12));
+        return gd;
+    }
+
+    private GradientDrawable createBoardBackground() {
+        GradientDrawable gd = new GradientDrawable();
+        gd.setColor(currentTheme.gridBg);
+        gd.setCornerRadius(dpToPx(16));
+        return gd;
+    }
+
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 
     private void updateScore() {
@@ -366,7 +510,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateNextTilePreview() {
         int next = game.getNextTile();
-        nextTileView.setBackgroundResource(getTileBackground(next));
+        nextTileView.setBackground(getTileDrawable(next));
         nextTileText.setText(String.valueOf(next));
     }
 
@@ -540,6 +684,207 @@ public class MainActivity extends AppCompatActivity {
 
         view.findViewById(R.id.magic_btn_cancel).setOnClickListener(v -> dialog.dismiss());
         dialog.show();
+    }
+
+    // ===== 截图功能 =====
+
+    /**
+     * 捕获当前界面截图，返回 Bitmap。
+     * 通过 DecorView.draw 渲染到 Canvas 上，包含状态栏在内。
+     */
+    private Bitmap captureScreenshot() {
+        View rootView = getWindow().getDecorView().getRootView();
+        rootView.setDrawingCacheEnabled(true);
+        Bitmap bitmap = Bitmap.createBitmap(
+                rootView.getWidth(), rootView.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        rootView.draw(canvas);
+        rootView.setDrawingCacheEnabled(false);
+        return bitmap;
+    }
+
+    /**
+     * 将截图保存到系统相册。
+     * Android 10+ 使用 MediaStore API，无需存储权限；
+     * 旧版本先检查 WRITE_EXTERNAL_STORAGE 权限。
+     */
+    private void saveScreenshotToGallery(Bitmap bitmap) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10+：通过 MediaStore 保存
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, "2048_" + System.currentTimeMillis() + ".png");
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/2048");
+
+            ContentResolver resolver = getContentResolver();
+            Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            if (uri != null) {
+                try (OutputStream out = resolver.openOutputStream(uri)) {
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                    Toast.makeText(this, "截图已保存到相册", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show();
+                }
+            }
+        } else {
+            // Android 9 及以下：写入外部存储
+            if (ActivityCompat.checkSelfPermission(this,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        REQUEST_WRITE_STORAGE);
+                return;
+            }
+            File dir = new File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "2048");
+            if (!dir.exists()) dir.mkdirs();
+            File file = new File(dir, "2048_" + System.currentTimeMillis() + ".png");
+            try (FileOutputStream out = new FileOutputStream(file)) {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                // 通知相册刷新
+                android.media.MediaScannerConnection.scanFile(this,
+                        new String[]{file.getAbsolutePath()}, null, null);
+                Toast.makeText(this, "截图已保存到相册", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * 弹出对话框让用户选择是否保存截图。
+     */
+    private void showSaveScreenshotDialog() {
+        showCustomDialog("截图", "截图已生成，是否保存到相册？",
+                "保存", "取消",
+                () -> {
+                    if (capturedBitmap != null) {
+                        saveScreenshotToGallery(capturedBitmap);
+                    }
+                    capturedBitmap = null;
+                },
+                () -> {
+                    capturedBitmap = null;
+                });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_WRITE_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 权限已授予，重试保存
+                if (capturedBitmap != null) {
+                    saveScreenshotToGallery(capturedBitmap);
+                }
+            } else {
+                Toast.makeText(this, "需要存储权限才能保存截图", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // ===== 主题风格切换 =====
+
+    /**
+     * 弹出主题选择对话框，列出所有可用风格。
+     */
+    private void showThemeDialog() {
+        Dialog dialog = new Dialog(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_theme_select, null);
+        dialog.setContentView(view);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
+        // 在 show() 之后强制设置窗口宽度，避免 Dialog 默认窄宽截断内容
+        int widthPx = Math.round(320 * getResources().getDisplayMetrics().density);
+        dialog.getWindow().setLayout(widthPx, WindowManager.LayoutParams.WRAP_CONTENT);
+
+        // 各主题行与对应的 View ID 及 check 标记 ID
+        int[][] themeRows = {
+                {R.id.theme_classic, R.id.theme_check_classic},
+                {R.id.theme_dark, R.id.theme_check_dark},
+                {R.id.theme_ocean, R.id.theme_check_ocean},
+                {R.id.theme_sakura, R.id.theme_check_sakura},
+                {R.id.theme_forest, R.id.theme_check_forest},
+                {R.id.theme_sunset, R.id.theme_check_sunset},
+        };
+        Theme[] themes = Theme.values();
+
+        // 初始化：当前主题显示 ✓，其余隐藏
+        for (int i = 0; i < themes.length; i++) {
+            View check = view.findViewById(themeRows[i][1]);
+            check.setVisibility(themes[i] == currentTheme ? View.VISIBLE : View.GONE);
+        }
+
+        // 设置各主题行的点击事件
+        for (int i = 0; i < themes.length; i++) {
+            final Theme theme = themes[i];
+            view.findViewById(themeRows[i][0]).setOnClickListener(v -> {
+                applyTheme(theme);
+                // 保存到 SharedPreferences
+                getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                        .edit().putString(KEY_THEME, theme.name()).apply();
+                dialog.dismiss();
+            });
+        }
+    }
+
+    /**
+     * 应用主题：更新主背景、棋盘底色、格子底色、分数面板和文字颜色，
+     * 然后刷新棋盘渲染。
+     */
+    private void applyTheme(Theme theme) {
+        currentTheme = theme;
+        if (scrollView == null) return;
+
+        // 主背景渐变
+        GradientDrawable gd = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{theme.colorStart, theme.colorEnd});
+        scrollView.setBackground(gd);
+
+        // 棋盘底色
+        if (boardFrame != null) {
+            boardFrame.setBackground(createBoardBackground());
+        }
+
+        // 分数面板背景
+        GradientDrawable panelBg = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{theme.scorePanelBg, theme.scorePanelBg});
+        panelBg.setCornerRadius(dpToPx(16));
+        if (scorePanelCurrent != null) scorePanelCurrent.setBackground(panelBg);
+        if (scorePanelBest != null) {
+            GradientDrawable panelBg2 = new GradientDrawable(
+                    GradientDrawable.Orientation.TOP_BOTTOM,
+                    new int[]{theme.scorePanelBg, theme.scorePanelBg});
+            panelBg2.setCornerRadius(dpToPx(16));
+            scorePanelBest.setBackground(panelBg2);
+        }
+
+        // 文字颜色
+        if (tvScore != null) tvScore.setTextColor(theme.textWarm);
+        if (tvBest != null) tvBest.setTextColor(theme.textWarm);
+        if (tvScoreLabel != null) tvScoreLabel.setTextColor(theme.textLabel);
+        if (tvBestLabel != null) tvBestLabel.setTextColor(theme.textLabel);
+
+        // 状态栏 / 导航栏
+        Window window = getWindow();
+        window.setStatusBarColor(darkenColor(theme.colorStart, 0.85f));
+        window.setNavigationBarColor(darkenColor(theme.colorEnd, 0.85f));
+
+        // 重新渲染棋盘（格子底色和方块色随主题变化）
+        renderBoard();
+    }
+
+    /**
+     * 将颜色按比例加深，用于状态栏/导航栏。
+     */
+    private int darkenColor(int color, float factor) {
+        int a = Color.alpha(color);
+        int r = Math.round(Color.red(color) * factor);
+        int g = Math.round(Color.green(color) * factor);
+        int b = Math.round(Color.blue(color) * factor);
+        return Color.argb(a, r, g, b);
     }
 
     private void playMergeSound() {

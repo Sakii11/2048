@@ -118,6 +118,7 @@
                 android:orientation="vertical">
 
                 <FrameLayout
+                    android:id="@+id/score_panel_current"
                     android:layout_width="90dp"
                     android:layout_height="50dp"
                     android:layout_marginBottom="8dp"
@@ -128,6 +129,7 @@
                         android:gravity="center"
                         android:orientation="vertical">
                         <TextView
+                            android:id="@+id/tv_score_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/score"
@@ -146,6 +148,7 @@
                 </FrameLayout>
 
                 <FrameLayout
+                    android:id="@+id/score_panel_best"
                     android:layout_width="90dp"
                     android:layout_height="50dp"
                     android:background="@drawable/bg_score_panel">
@@ -155,6 +158,7 @@
                         android:gravity="center"
                         android:orientation="vertical">
                         <TextView
+                            android:id="@+id/tv_best_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/best"
@@ -284,6 +288,7 @@
             android:layout_height="360dp">
 
             <FrameLayout
+                android:id="@+id/board_frame"
                 android:layout_width="360dp"
                 android:layout_height="360dp"
                 android:layout_gravity="center"
