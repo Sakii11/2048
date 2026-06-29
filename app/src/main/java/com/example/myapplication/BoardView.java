@@ -74,6 +74,9 @@ public class BoardView extends View {
     private Paint[] tileTextPaints = new Paint[12];
     private Paint mergeTextPaint;
     private RectF tempRect = new RectF();
+    private Shader[] tileShaders = new Shader[12];
+    private boolean[][] isSliding = new boolean[4][4];
+    private float[][][] cellCenters = new float[4][4][2];
 
     // ===== 动画状态 =====
     private static final int ANIM_IDLE = 0;
@@ -313,11 +316,19 @@ public class BoardView extends View {
         float available = totalSize - 2 * padPx - 3 * gapPx;
         cellSize = available / 4f;
 
-        // 居中棋盘
         boardLeft = (w - totalSize) / 2f + padPx;
         boardTop = (h - totalSize) / 2f + padPx;
         boardRight = boardLeft + 4 * cellSize + 3 * gapPx;
         boardBottom = boardTop + 4 * cellSize + 3 * gapPx;
+
+        for (int r = 0; r < 4; r++) {
+            float top = boardTop + r * (cellSize + gapPx);
+            for (int c = 0; c < 4; c++) {
+                float left = boardLeft + c * (cellSize + gapPx);
+                cellCenters[r][c][0] = left + cellSize / 2f;
+                cellCenters[r][c][1] = top + cellSize / 2f;
+            }
+        }
 
         updatePaints();
     }
@@ -327,7 +338,12 @@ public class BoardView extends View {
         cellBgPaint.setColor(cellBgColor);
 
         for (int i = 0; i < 12; i++) {
-            // 文本颜色：索引 0-5 (2-64) 白色，6+ (128+) 暖色
+            tileShaders[i] = new LinearGradient(
+                    0, 0, cellSize, cellSize,
+                    tileStartColors[i], tileEndColors[i],
+                    Shader.TileMode.CLAMP);
+            tilePaints[i].setShader(tileShaders[i]);
+
             int textColor = (i >= 6) ? textWarmColor : Color.WHITE;
             tileTextPaints[i].setColor(textColor);
         }
@@ -340,11 +356,9 @@ public class BoardView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // 1. 棋盘背景
         tempRect.set(boardLeft - gapPx, boardTop - gapPx, boardRight + gapPx, boardBottom + gapPx);
         canvas.drawRoundRect(tempRect, boardRadius, boardRadius, boardBgPaint);
 
-        // 2. 所有格子背景（始终绘制）
         for (int r = 0; r < 4; r++) {
             for (int c = 0; c < 4; c++) {
                 float left = boardLeft + c * (cellSize + gapPx);
@@ -354,11 +368,14 @@ public class BoardView extends View {
             }
         }
 
-        // 3. 方块绘制
         float currentBlink = (selectMode != 0) ? blinkAlpha : 1f;
 
-        // 构建滑动目标集合（动画期间用于跳过正常位置的绘制）
-        boolean[][] isSliding = new boolean[4][4];
+        for (int r = 0; r < 4; r++) {
+            isSliding[r][0] = false;
+            isSliding[r][1] = false;
+            isSliding[r][2] = false;
+            isSliding[r][3] = false;
+        }
         if (animPhase == ANIM_SLIDE) {
             for (int[] m : slideMovements) {
                 isSliding[m[0]][m[1]] = true;
@@ -370,24 +387,21 @@ public class BoardView extends View {
                 int value = board[r][c];
                 if (value == 0) continue;
 
-                // 滑动动画中的方块：移到插值位置绘制
                 if (animPhase == ANIM_SLIDE && isSliding[r][c]) {
-                    float[] from = cellCenter(slideSourceRow(r, c), slideSourceCol(r, c));
-                    float[] to = cellCenter(r, c);
+                    float[] from = cellCenters[slideSourceRow(r, c)][slideSourceCol(r, c)];
+                    float[] to = cellCenters[r][c];
                     float cx = from[0] + (to[0] - from[0]) * slideProgress;
                     float cy = from[1] + (to[1] - from[1]) * slideProgress;
                     drawTileAt(canvas, value, cx, cy, 1f, currentBlink);
                 } else {
-                    float[] center = cellCenter(r, c);
+                    float[] center = cellCenters[r][c];
                     float scale = 1f;
                     float alpha = 1f;
 
-                    // 合成动画
                     if (animPhase == ANIM_MERGE && isMergeCell(r, c)) {
                         scale = computeMergeScale(mergeProgress);
                     }
 
-                    // 选择模式闪烁
                     if (selectMode != 0) {
                         alpha = currentBlink;
                     }
@@ -406,26 +420,18 @@ public class BoardView extends View {
         Paint tilePaint = tilePaints[idx];
         Paint textPaint = tileTextPaints[idx];
 
-        // 动态创建渐变着色器（因方块位置可能随时变化）
         float halfSize = cellSize / 2f * scale;
         float left = cx - halfSize;
         float top = cy - halfSize;
         float right = cx + halfSize;
         float bottom = cy + halfSize;
 
-        Shader gradient = new LinearGradient(
-                left, top, right, bottom,
-                tileStartColors[idx], tileEndColors[idx],
-                Shader.TileMode.CLAMP);
-        tilePaint.setShader(gradient);
         tilePaint.setAlpha((int) (255 * alpha));
 
         tempRect.set(left, top, right, bottom);
         canvas.drawRoundRect(tempRect, cornerRadius * scale, cornerRadius * scale, tilePaint);
 
-        // 文字
         textPaint.setAlpha((int) (255 * alpha));
-        // 字体大小随方块值和方块大小调整
         float textSize;
         if (value >= 1024) {
             textSize = 16f * density;

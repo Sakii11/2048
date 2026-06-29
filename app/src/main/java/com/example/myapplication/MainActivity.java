@@ -3,7 +3,6 @@ package com.example.myapplication;
 import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -42,11 +41,9 @@ import com.example.myapplication.Game2048.MoveResult;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String PREFS_NAME = "game2048_prefs";
-    private static final String KEY_BEST = "best_score";
-    private static final String KEY_THEME = "app_theme";
     private static final int REQUEST_WRITE_STORAGE = 100;
 
+    private AppDatabaseHelper dbHelper;
     private Game2048 game;
     private BoardView boardView;
     private BoardScrollView scrollView;
@@ -169,11 +166,11 @@ public class MainActivity extends AppCompatActivity {
         tvSelectHint = findViewById(R.id.tv_select_hint);
         boardView = findViewById(R.id.board_view);
 
-        // 加载存档
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        bestScore = prefs.getInt(KEY_BEST, 0);
+        dbHelper = new AppDatabaseHelper(this);
+
+        bestScore = dbHelper.getBestScore();
         tvBest.setText(String.valueOf(bestScore));
-        String savedTheme = prefs.getString(KEY_THEME, "CLASSIC");
+        String savedTheme = dbHelper.getAppTheme();
         try {
             currentTheme = Theme.valueOf(savedTheme);
         } catch (IllegalArgumentException e) {
@@ -406,8 +403,7 @@ public class MainActivity extends AppCompatActivity {
         if (score > bestScore) {
             bestScore = score;
             tvBest.setText(String.valueOf(bestScore));
-            getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                    .edit().putInt(KEY_BEST, bestScore).apply();
+            dbHelper.setBestScore(bestScore);
         }
     }
 
@@ -569,8 +565,7 @@ public class MainActivity extends AppCompatActivity {
 
             itemView.setOnClickListener(v -> {
                 applyTheme(theme);
-                getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                        .edit().putString(KEY_THEME, theme.name()).apply();
+                dbHelper.setAppTheme(theme.name());
                 dialog.dismiss();
             });
         }
@@ -938,6 +933,9 @@ public class MainActivity extends AppCompatActivity {
         if (mergePlayer != null) {
             mergePlayer.release();
             mergePlayer = null;
+        }
+        if (dbHelper != null) {
+            dbHelper.close();
         }
     }
 }
