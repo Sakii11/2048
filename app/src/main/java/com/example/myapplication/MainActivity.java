@@ -25,6 +25,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -518,6 +519,20 @@ public class MainActivity extends AppCompatActivity {
         View view = getLayoutInflater().inflate(R.layout.dialog_theme_select, null);
         dialog.setContentView(view);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        // ScrollView 内层 LinearLayout 背景随主题
+        ScrollView scrollView = (ScrollView) view;
+        android.view.ViewGroup innerLayout = (android.view.ViewGroup) scrollView.getChildAt(0);
+        GradientDrawable itemBg = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{currentTheme.scorePanelBg, currentTheme.gridCell});
+        itemBg.setCornerRadius(dpToPx(16));
+        innerLayout.setBackground(itemBg);
+
+        // 标题颜色随主题
+        TextView themeTitle = (TextView) innerLayout.getChildAt(0);
+        themeTitle.setTextColor(currentTheme.textWarm);
+
         dialog.show();
         int widthPx = Math.round(320 * getResources().getDisplayMetrics().density);
         dialog.getWindow().setLayout(widthPx, WindowManager.LayoutParams.WRAP_CONTENT);
@@ -539,7 +554,20 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i = 0; i < themes.length; i++) {
             final Theme theme = themes[i];
-            view.findViewById(themeRows[i][0]).setOnClickListener(v -> {
+            // 主题项背景随主题
+            View itemView = view.findViewById(themeRows[i][0]);
+            GradientDrawable themeItemBg = new GradientDrawable();
+            themeItemBg.setColor(currentTheme.gridCell);
+            themeItemBg.setCornerRadius(dpToPx(12));
+            themeItemBg.setStroke(dpToPx(1), currentTheme.textWarm);
+            itemView.setBackground(themeItemBg);
+
+            // 主题名文字颜色
+            android.view.ViewGroup rowLayout = (android.view.ViewGroup) itemView;
+            TextView nameText = (TextView) rowLayout.getChildAt(1);
+            nameText.setTextColor(currentTheme.textWarm);
+
+            itemView.setOnClickListener(v -> {
                 applyTheme(theme);
                 getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                         .edit().putString(KEY_THEME, theme.name()).apply();
@@ -598,8 +626,27 @@ public class MainActivity extends AppCompatActivity {
         dialog.setContentView(view);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        // 弹窗背景随主题
+        GradientDrawable dialogBg = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{currentTheme.scorePanelBg, currentTheme.gridCell});
+        dialogBg.setCornerRadius(dpToPx(20));
+        view.setBackground(dialogBg);
+
+        // 标题颜色随主题
+        TextView tvTitle = view.findViewById(R.id.dialog_title);
+        tvTitle.setTextColor(currentTheme.textWarm);
+
         ImageButton btnVoice = view.findViewById(R.id.dialog_btn_voice);
         ImageButton btnRestart = view.findViewById(R.id.dialog_btn_restart);
+
+        // 图标按钮背景随主题
+        GradientDrawable iconBg = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{currentTheme.gridCell, currentTheme.gridBg});
+        iconBg.setCornerRadius(dpToPx(12));
+        btnVoice.setBackground(iconBg);
+        btnRestart.setBackground(iconBg);
 
         btnVoice.setOnClickListener(v -> {
             if (isMusicPlaying) {
@@ -638,14 +685,39 @@ public class MainActivity extends AppCompatActivity {
         dialog.setContentView(view);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        // 弹窗背景随主题
+        GradientDrawable dialogBg = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{currentTheme.scorePanelBg, currentTheme.gridCell});
+        dialogBg.setCornerRadius(dpToPx(20));
+        view.setBackground(dialogBg);
+
         TextView tvTitle = view.findViewById(R.id.dialog_title);
         TextView tvMessage = view.findViewById(R.id.dialog_message);
         Button btnPositive = view.findViewById(R.id.dialog_btn_positive);
         Button btnNegative = view.findViewById(R.id.dialog_btn_negative);
 
         tvTitle.setText(title);
+        tvTitle.setTextColor(currentTheme.textWarm);
         tvMessage.setText(message);
+        tvMessage.setTextColor(currentTheme.textLabel);
         btnPositive.setText(positiveText);
+
+        // 确认按钮：主题渐变色
+        GradientDrawable posBg = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                new int[]{currentTheme.colorStart, currentTheme.colorEnd});
+        posBg.setCornerRadius(dpToPx(26));
+        btnPositive.setBackground(posBg);
+        btnPositive.setTextColor(Color.WHITE);
+
+        // 取消按钮：主题边框色
+        GradientDrawable negBg = new GradientDrawable();
+        negBg.setColor(currentTheme.gridCell);
+        negBg.setCornerRadius(dpToPx(26));
+        negBg.setStroke(dpToPx(2), currentTheme.textWarm);
+        btnNegative.setBackground(negBg);
+        btnNegative.setTextColor(currentTheme.textWarm);
 
         if (negativeText != null) {
             btnNegative.setText(negativeText);
@@ -671,19 +743,43 @@ public class MainActivity extends AppCompatActivity {
         dialog.setContentView(view);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        // 弹窗背景随主题
+        GradientDrawable dialogBg = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{currentTheme.scorePanelBg, currentTheme.gridCell});
+        dialogBg.setCornerRadius(dpToPx(20));
+        view.setBackground(dialogBg);
+
+        // 标题颜色随主题
+        TextView title = view.findViewById(R.id.magic_title);
+        title.setTextColor(currentTheme.textWarm);
+
         int[] values = {2, 4, 8, 16, 32};
         int[] btnIds = {R.id.magic_btn_2, R.id.magic_btn_4, R.id.magic_btn_8,
                 R.id.magic_btn_16, R.id.magic_btn_32};
 
         for (int i = 0; i < values.length; i++) {
             final int val = values[i];
-            view.findViewById(btnIds[i]).setOnClickListener(v -> {
+            TextView btn = view.findViewById(btnIds[i]);
+            btn.setOnClickListener(v -> {
                 dialog.dismiss();
                 enterSelectMode(SelectMode.MAGIC, val);
             });
+            btn.setBackground(getTileDrawable(val));
+            btn.setTextColor(Color.WHITE);
         }
 
-        view.findViewById(R.id.magic_btn_cancel).setOnClickListener(v -> dialog.dismiss());
+        // 取消按钮随主题
+        Button btnCancel = view.findViewById(R.id.magic_btn_cancel);
+        GradientDrawable cancelBg = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                new int[]{currentTheme.gridCell, currentTheme.gridBg});
+        cancelBg.setCornerRadius(dpToPx(26));
+        cancelBg.setStroke(dpToPx(2), currentTheme.textWarm);
+        btnCancel.setBackground(cancelBg);
+        btnCancel.setTextColor(currentTheme.textWarm);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
     }
 
