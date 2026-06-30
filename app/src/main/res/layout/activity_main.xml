@@ -1,332 +1,342 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.example.myapplication.BoardScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scroll_view"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <!-- 星空 + 渐变背景（同一层） -->
+    <com.example.myapplication.StarsView
+        android:id="@+id/stars_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- 游戏内容层 -->
+    <com.example.myapplication.BoardScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
+        android:background="@android:color/transparent"
+        android:fillViewport="true">
 
-        <!-- 顶部留白，整体下移 -->
-        <View
-            android:layout_width="0dp"
-            android:layout_height="24dp" />
-
-        <!-- ===== 顶部区域：预览方块 + 得分面板 ===== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="16dp">
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
-            <!-- 2×2 迷你数字预览方块 -->
-
-            <!-- 弹性空间 -->
-            <GridLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:columnCount="2"
-                android:rowCount="2">
-
-                <!-- 黄色 2 -->
-                <FrameLayout
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_margin="3dp"
-                    android:background="@drawable/bg_preview_tile_yellow">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:shadowColor="#40000000"
-                        android:shadowRadius="2"
-                        android:text="2"
-                        android:textColor="@color/text_white"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-                </FrameLayout>
-
-                <!-- 橙色 0 -->
-                <FrameLayout
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_margin="3dp"
-                    android:background="@drawable/bg_preview_tile_orange">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:shadowColor="#40000000"
-                        android:shadowRadius="2"
-                        android:text="0"
-                        android:textColor="@color/text_white"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-                </FrameLayout>
-
-                <!-- 深棕 4 -->
-                <FrameLayout
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_margin="3dp"
-                    android:background="@drawable/bg_preview_tile_brown">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:shadowColor="#40000000"
-                        android:shadowRadius="2"
-                        android:text="4"
-                        android:textColor="@color/text_white"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-                </FrameLayout>
-
-                <!-- 浅橙 8 -->
-                <FrameLayout
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_margin="3dp"
-                    android:background="@drawable/bg_preview_tile_light_orange">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:shadowColor="#40000000"
-                        android:shadowRadius="1"
-                        android:text="8"
-                        android:textColor="@color/text_warm"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-                </FrameLayout>
-            </GridLayout>
-
-            <Space
+            <!-- 顶部留白，整体下移 -->
+            <View
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_height="24dp" />
 
-            <!-- 得分面板 -->
+            <!-- ===== 顶部区域：预览方块 + 得分面板 ===== -->
             <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <!-- 2×2 迷你数字预览方块 -->
+                <GridLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2"
+                    android:rowCount="2">
+
+                    <!-- 黄色 2 -->
+                    <FrameLayout
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_margin="3dp"
+                        android:background="@drawable/bg_preview_tile_yellow">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:shadowColor="#40000000"
+                            android:shadowRadius="2"
+                            android:text="2"
+                            android:textColor="@color/text_white"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+                    </FrameLayout>
+
+                    <!-- 橙色 0 -->
+                    <FrameLayout
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_margin="3dp"
+                        android:background="@drawable/bg_preview_tile_orange">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:shadowColor="#40000000"
+                            android:shadowRadius="2"
+                            android:text="0"
+                            android:textColor="@color/text_white"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+                    </FrameLayout>
+
+                    <!-- 深棕 4 -->
+                    <FrameLayout
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_margin="3dp"
+                        android:background="@drawable/bg_preview_tile_brown">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:shadowColor="#40000000"
+                            android:shadowRadius="2"
+                            android:text="4"
+                            android:textColor="@color/text_white"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+                    </FrameLayout>
+
+                    <!-- 浅橙 8 -->
+                    <FrameLayout
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_margin="3dp"
+                        android:background="@drawable/bg_preview_tile_light_orange">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:shadowColor="#40000000"
+                            android:shadowRadius="1"
+                            android:text="8"
+                            android:textColor="@color/text_warm"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+                    </FrameLayout>
+                </GridLayout>
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <!-- 得分面板 -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <FrameLayout
+                        android:id="@+id/score_panel_current"
+                        android:layout_width="90dp"
+                        android:layout_height="50dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_score_panel">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/tv_score_label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/score"
+                                android:textColor="@color/text_score_label"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/tv_score"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@color/text_white"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/score_panel_best"
+                        android:layout_width="90dp"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_score_panel">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/tv_best_label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/best"
+                                android:textColor="@color/text_score_label"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/tv_best"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@color/text_white"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ===== 功能按钮行 ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <!-- 设置按钮 -->
+                <ImageButton
+                    android:id="@+id/btn_settings"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_score_panel"
+                    android:padding="10dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_settings" />
+
+                <!-- 下一个方块预览 -->
+                <FrameLayout
+                    android:id="@+id/next_tile_preview"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_grid_cell">
+                    <View
+                        android:id="@+id/next_tile_view"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_preview_tile_yellow" />
+                    <TextView
+                        android:id="@+id/next_tile_text"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:textColor="@color/text_white"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:text="2"
+                        android:shadowColor="#40000000"
+                        android:shadowRadius="2" />
+                </FrameLayout>
+
+                <!-- 弹性空间 -->
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <!-- 撤回按钮 -->
+                <ImageButton
+                    android:id="@+id/btn_undo"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_btn_undo"
+                    android:padding="10dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_undo" />
+
+                <!-- 锤子道具按钮 -->
+                <ImageButton
+                    android:id="@+id/btn_hammer"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_btn_hammer"
+                    android:padding="10dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_hammer" />
+
+                <!-- 魔法星星道具按钮 -->
+                <ImageButton
+                    android:id="@+id/btn_magic"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_btn_magic"
+                    android:padding="10dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_magic" />
+            </LinearLayout>
+
+            <!-- 选择模式提示文字（默认隐藏） -->
+            <TextView
+                android:id="@+id/tv_select_hint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <FrameLayout
-                    android:id="@+id/score_panel_current"
-                    android:layout_width="90dp"
-                    android:layout_height="50dp"
-                    android:layout_marginBottom="8dp"
-                    android:background="@drawable/bg_score_panel">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/tv_score_label"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/score"
-                            android:textColor="@color/text_score_label"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-                        <TextView
-                            android:id="@+id/tv_score"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textColor="@color/text_white"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/score_panel_best"
-                    android:layout_width="90dp"
-                    android:layout_height="50dp"
-                    android:background="@drawable/bg_score_panel">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/tv_best_label"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/best"
-                            android:textColor="@color/text_score_label"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-                        <TextView
-                            android:id="@+id/tv_best"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textColor="@color/text_white"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </FrameLayout>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- ===== 功能按钮行 ===== -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp">
-
-            <!-- 设置按钮 -->
-            <ImageButton
-                android:id="@+id/btn_settings"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="4dp"
                 android:background="@drawable/bg_score_panel"
-                android:padding="10dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_settings" />
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:textColor="@color/text_warm"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
-            <!-- 下一个方块预览 -->
+            <!-- ===== 棋盘容器（固定 360dp × 360dp） ===== -->
             <FrameLayout
-                android:id="@+id/next_tile_preview"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_grid_cell">
-                <View
-                    android:id="@+id/next_tile_view"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/bg_preview_tile_yellow" />
-                <TextView
-                    android:id="@+id/next_tile_text"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:textColor="@color/text_white"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:text="2"
-                    android:shadowColor="#40000000"
-                    android:shadowRadius="2" />
+                android:id="@+id/board_container"
+                android:layout_width="match_parent"
+                android:layout_height="360dp">
+
+                <com.example.myapplication.BoardView
+                    android:id="@+id/board_view"
+                    android:layout_width="360dp"
+                    android:layout_height="360dp"
+                    android:layout_gravity="center" />
             </FrameLayout>
 
-            <!-- 弹性空间 -->
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+            <!-- ===== 底部工具栏 ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
 
-            <!-- 撤回按钮 -->
-            <ImageButton
-                android:id="@+id/btn_undo"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="6dp"
-                android:background="@drawable/bg_btn_undo"
-                android:padding="10dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_undo" />
+                <ImageButton
+                    android:id="@+id/btn_upload"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@android:color/transparent"
+                    android:padding="8dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_upload"
+                    android:tint="@color/text_score_label" />
 
-            <!-- 锤子道具按钮 -->
-            <ImageButton
-                android:id="@+id/btn_hammer"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="6dp"
-                android:background="@drawable/bg_btn_hammer"
-                android:padding="10dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_hammer" />
+                <ImageButton
+                    android:id="@+id/btn_clothing"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@android:color/transparent"
+                    android:padding="8dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_clothing"
+                    android:tint="@color/text_score_label" />
+            </LinearLayout>
 
-            <!-- 魔法星星道具按钮 -->
-            <ImageButton
-                android:id="@+id/btn_magic"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="6dp"
-                android:background="@drawable/bg_btn_magic"
-                android:padding="10dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_magic" />
         </LinearLayout>
-
-        <!-- 选择模式提示文字（默认隐藏） -->
-        <TextView
-            android:id="@+id/tv_select_hint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp"
-            android:background="@drawable/bg_score_panel"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:textColor="@color/text_warm"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
-
-        <!-- ===== 棋盘容器（固定 360dp × 360dp） ===== -->
-        <FrameLayout
-            android:id="@+id/board_container"
-            android:layout_width="match_parent"
-            android:layout_height="360dp">
-
-            <com.example.myapplication.BoardView
-                android:id="@+id/board_view"
-                android:layout_width="360dp"
-                android:layout_height="360dp"
-                android:layout_gravity="center" />
-        </FrameLayout>
-
-        <!-- ===== 底部工具栏 ===== -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-            <ImageButton
-                android:id="@+id/btn_upload"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="12dp"
-                android:background="@android:color/transparent"
-                android:padding="8dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_upload"
-                android:tint="@color/text_score_label" />
-
-            <ImageButton
-                android:id="@+id/btn_clothing"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@android:color/transparent"
-                android:padding="8dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_clothing"
-                android:tint="@color/text_score_label" />
-        </LinearLayout>
-
-    </LinearLayout>
-</com.example.myapplication.BoardScrollView>
+    </com.example.myapplication.BoardScrollView>
+</FrameLayout>

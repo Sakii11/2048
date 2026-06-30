@@ -19,6 +19,11 @@ public class Game2048 {
     private Random random;
     private boolean won;
 
+    private int[] tempRow = new int[SIZE];
+    private int[] tempResult = new int[SIZE];
+    private int[] tempMergedAt = new int[SIZE];
+    private RowResult tempRowResult = new RowResult(new int[SIZE], 0, new int[SIZE]);
+
     public Game2048() {
         board = new int[SIZE][SIZE];
         history = new Stack<>();
@@ -70,7 +75,7 @@ public class Game2048 {
             case LEFT:
                 for (int r = 0; r < SIZE; r++) {
                     RowResult rr = mergeLine(board[r]);
-                    board[r] = rr.line;
+                    System.arraycopy(rr.line, 0, board[r], 0, SIZE);
                     score += rr.score;
                     for (int c = 0; c < SIZE; c++) {
                         if (rr.mergedAt[c] != 0) merged[r][c] = 1;
@@ -79,9 +84,10 @@ public class Game2048 {
                 break;
             case RIGHT:
                 for (int r = 0; r < SIZE; r++) {
-                    int[] reversed = reverse(board[r]);
-                    RowResult rr = mergeLine(reversed);
-                    board[r] = reverse(rr.line);
+                    reverseInPlace(board[r]);
+                    RowResult rr = mergeLine(board[r]);
+                    System.arraycopy(rr.line, 0, board[r], 0, SIZE);
+                    reverseInPlace(board[r]);
                     score += rr.score;
                     for (int c = 0; c < SIZE; c++) {
                         if (rr.mergedAt[c] != 0) merged[r][SIZE - 1 - c] = 1;
@@ -90,9 +96,8 @@ public class Game2048 {
                 break;
             case UP:
                 for (int c = 0; c < SIZE; c++) {
-                    int[] col = new int[SIZE];
-                    for (int r = 0; r < SIZE; r++) col[r] = board[r][c];
-                    RowResult rr = mergeLine(col);
+                    for (int r = 0; r < SIZE; r++) tempRow[r] = board[r][c];
+                    RowResult rr = mergeLine(tempRow);
                     score += rr.score;
                     for (int r = 0; r < SIZE; r++) {
                         board[r][c] = rr.line[r];
@@ -102,14 +107,14 @@ public class Game2048 {
                 break;
             case DOWN:
                 for (int c = 0; c < SIZE; c++) {
-                    int[] col = new int[SIZE];
-                    for (int r = 0; r < SIZE; r++) col[r] = board[r][c];
-                    int[] reversed = reverse(col);
-                    RowResult rr = mergeLine(reversed);
+                    for (int r = 0; r < SIZE; r++) tempRow[r] = board[r][c];
+                    reverseInPlace(tempRow);
+                    RowResult rr = mergeLine(tempRow);
+                    for (int i = 0; i < SIZE; i++) tempRow[i] = rr.line[i];
+                    reverseInPlace(tempRow);
                     score += rr.score;
-                    int[] resultCol = reverse(rr.line);
                     for (int r = 0; r < SIZE; r++) {
-                        board[r][c] = resultCol[r];
+                        board[r][c] = tempRow[r];
                         if (rr.mergedAt[r] != 0) merged[SIZE - 1 - r][c] = 1;
                     }
                 }
@@ -142,8 +147,14 @@ public class Game2048 {
     }
 
     private RowResult mergeLine(int[] line) {
-        int[] mergedAt = new int[SIZE];
-        int[] result = new int[SIZE];
+        int[] result = tempRowResult.line;
+        int[] mergedAt = tempRowResult.mergedAt;
+
+        for (int i = 0; i < SIZE; i++) {
+            result[i] = 0;
+            mergedAt[i] = 0;
+        }
+
         int pos = 0;
 
         for (int i = 0; i < SIZE; i++) {
@@ -160,7 +171,8 @@ public class Game2048 {
             }
         }
 
-        return new RowResult(result, getScoreFromMerge(mergedAt, result), mergedAt);
+        tempRowResult.score = getScoreFromMerge(mergedAt, result);
+        return tempRowResult;
     }
 
     private int getScoreFromMerge(int[] mergedAt, int[] result) {
@@ -171,12 +183,12 @@ public class Game2048 {
         return s;
     }
 
-    private int[] reverse(int[] arr) {
-        int[] rev = new int[arr.length];
-        for (int i = 0; i < arr.length; i++) {
-            rev[i] = arr[arr.length - 1 - i];
+    private void reverseInPlace(int[] arr) {
+        for (int i = 0; i < arr.length / 2; i++) {
+            int temp = arr[i];
+            arr[i] = arr[arr.length - 1 - i];
+            arr[arr.length - 1 - i] = temp;
         }
-        return rev;
     }
 
     private boolean boardsEqual(int[][] a, int[][] b) {

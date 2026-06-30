@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -34,6 +35,8 @@ public class AnimatedBoardView extends View {
 
     private float cellSize;
     private float gap;
+    private float floatOffset = 0f;
+    private ValueAnimator floatAnimator;
 
     private final Runnable tickRunnable = new Runnable() {
         @Override
@@ -59,6 +62,15 @@ public class AnimatedBoardView extends View {
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setFakeBoldText(true);
+
+        floatAnimator = ValueAnimator.ofFloat(-2f, 2f);
+        floatAnimator.setDuration(1500);
+        floatAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        floatAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        floatAnimator.addUpdateListener(a -> {
+            floatOffset = (float) a.getAnimatedValue();
+            invalidate();
+        });
     }
 
     /**
@@ -67,6 +79,7 @@ public class AnimatedBoardView extends View {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        if (floatAnimator != null) floatAnimator.start();
         handler.postDelayed(tickRunnable, 800);
     }
 
@@ -74,6 +87,7 @@ public class AnimatedBoardView extends View {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         handler.removeCallbacks(tickRunnable);
+        if (floatAnimator != null) floatAnimator.cancel();
     }
 
     /**
@@ -119,7 +133,7 @@ public class AnimatedBoardView extends View {
         for (int r = 0; r < GRID_SIZE; r++) {
             for (int c = 0; c < GRID_SIZE; c++) {
                 float x = gap + c * (cellSize + gap);
-                float y = gap + r * (cellSize + gap);
+                float y = gap + r * (cellSize + gap) + floatOffset;
                 RectF rect = new RectF(x, y, x + cellSize, y + cellSize);
                 float corner = cellSize * 0.08f;
 

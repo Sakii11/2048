@@ -77,6 +77,9 @@ public class BoardView extends View {
     private Shader[] tileShaders = new Shader[12];
     private boolean[][] isSliding = new boolean[4][4];
     private float[][][] cellCenters = new float[4][4][2];
+    private int[][] slideMapRow = new int[4][4];
+    private int[][] slideMapCol = new int[4][4];
+    private String[] numberStrings = new String[4096];
 
     // ===== 动画状态 =====
     private static final int ANIM_IDLE = 0;
@@ -156,6 +159,10 @@ public class BoardView extends View {
             blinkAlpha = (float) a.getAnimatedValue();
             invalidate();
         });
+
+        for (int i = 0; i < numberStrings.length; i++) {
+            numberStrings[i] = String.valueOf(i);
+        }
     }
 
     // ===== 公开 API =====
@@ -184,6 +191,18 @@ public class BoardView extends View {
 
         // 计算滑动映射
         slideMovements = calculateSlideMovements(oldBoard, direction, mergedAt);
+        for (int r = 0; r < 4; r++) {
+            for (int c = 0; c < 4; c++) {
+                slideMapRow[r][c] = r;
+                slideMapCol[r][c] = c;
+            }
+        }
+        for (int i = 0; i < slideMovements.size(); i++) {
+            int[] m = slideMovements.get(i);
+            slideMapRow[m[0]][m[1]] = m[2];
+            slideMapCol[m[0]][m[1]] = m[3];
+        }
+
         mergeCells.clear();
         for (int r = 0; r < 4; r++) {
             for (int c = 0; c < 4; c++) {
@@ -377,7 +396,8 @@ public class BoardView extends View {
             isSliding[r][3] = false;
         }
         if (animPhase == ANIM_SLIDE) {
-            for (int[] m : slideMovements) {
+            for (int i = 0; i < slideMovements.size(); i++) {
+                int[] m = slideMovements.get(i);
                 isSliding[m[0]][m[1]] = true;
             }
         }
@@ -388,7 +408,7 @@ public class BoardView extends View {
                 if (value == 0) continue;
 
                 if (animPhase == ANIM_SLIDE && isSliding[r][c]) {
-                    float[] from = cellCenters[slideSourceRow(r, c)][slideSourceCol(r, c)];
+                    float[] from = cellCenters[slideMapRow[r][c]][slideMapCol[r][c]];
                     float[] to = cellCenters[r][c];
                     float cx = from[0] + (to[0] - from[0]) * slideProgress;
                     float cy = from[1] + (to[1] - from[1]) * slideProgress;
@@ -443,7 +463,7 @@ public class BoardView extends View {
         textPaint.setTextSize(textSize);
 
         float textY = cy - (textPaint.descent() + textPaint.ascent()) / 2f;
-        canvas.drawText(String.valueOf(value), cx, textY, textPaint);
+        canvas.drawText(numberStrings[value], cx, textY, textPaint);
     }
 
     // 计算格子中心坐标
@@ -453,23 +473,9 @@ public class BoardView extends View {
         return new float[]{x, y};
     }
 
-    // 查找滑动方块的源位置
-    private int slideSourceRow(int tr, int tc) {
-        for (int[] m : slideMovements) {
-            if (m[0] == tr && m[1] == tc) return m[2];
-        }
-        return tr;
-    }
-
-    private int slideSourceCol(int tr, int tc) {
-        for (int[] m : slideMovements) {
-            if (m[0] == tr && m[1] == tc) return m[3];
-        }
-        return tc;
-    }
-
     private boolean isMergeCell(int r, int c) {
-        for (int[] mc : mergeCells) {
+        for (int i = 0; i < mergeCells.size(); i++) {
+            int[] mc = mergeCells.get(i);
             if (mc[0] == r && mc[1] == c) return true;
         }
         return false;

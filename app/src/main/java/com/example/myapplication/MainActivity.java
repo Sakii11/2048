@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private Game2048 game;
     private BoardView boardView;
     private BoardScrollView scrollView;
+    private StarsView starsView;
     private TextView tvScore;
     private TextView tvBest;
     private TextView tvScoreLabel;
@@ -222,6 +223,7 @@ public class MainActivity extends AppCompatActivity {
         // 初始化游戏
         game = new Game2048();
         scrollView = (BoardScrollView) findViewById(R.id.scroll_view);
+        starsView = findViewById(R.id.stars_view);
         scrollView.setBoardContainer(findViewById(R.id.board_container));
 
         // 设置 BoardView
@@ -472,11 +474,10 @@ public class MainActivity extends AppCompatActivity {
         currentTheme = theme;
         if (scrollView == null) return;
 
-        // 主背景
-        GradientDrawable gd = new GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{theme.colorStart, theme.colorEnd});
-        scrollView.setBackground(gd);
+        // 更新星空颜色和渐变背景（由 StarsView 统一绘制）
+        if (starsView != null) {
+            starsView.setTheme(theme.ordinal());
+        }
 
         // 分数面板
         GradientDrawable panelBg = new GradientDrawable(

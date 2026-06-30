@@ -1,68 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
-    android:padding="32dp"
     android:background="#F5E6D3">
 
-    <!-- 顶部大标题 -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_weight="3"
-        android:gravity="center"
-        android:text="2048"
-        android:textColor="#5D4E37"
-        android:textSize="72sp"
-        android:textStyle="bold"
-        android:shadowColor="#40000000"
-        android:shadowDx="2"
-        android:shadowDy="4"
-        android:shadowRadius="6" />
+    <!-- 粒子背景层（最底层） -->
+    <com.example.myapplication.ParticleView
+        android:id="@+id/particle_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-    <!-- 中间演示棋盘 -->
-    <com.example.myapplication.AnimatedBoardView
-        android:id="@+id/animated_board"
-        android:layout_width="240dp"
-        android:layout_height="240dp"
-        android:layout_marginBottom="24dp" />
-
-    <!-- 底部按钮区域 -->
+    <!-- 内容层 -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center_horizontal"
+        android:padding="32dp"
+        android:background="@android:color/transparent">
 
-        <Button
-            android:id="@+id/btn_level_mode"
-            android:layout_width="220dp"
-            android:layout_height="52dp"
-            android:text="关卡模式"
-            android:textColor="#FFFFFF"
-            android:textSize="17sp"
+        <!-- 顶部大标题 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:gravity="center"
+            android:text="2048"
+            android:textColor="#5D4E37"
+            android:textSize="72sp"
             android:textStyle="bold"
-            android:background="@drawable/bg_level_btn"
-            app:backgroundTint="@null"
-            android:elevation="4dp"
-            android:layout_marginBottom="16dp" />
+            android:shadowColor="#40000000"
+            android:shadowDx="2"
+            android:shadowDy="4"
+            android:shadowRadius="6" />
 
-        <Button
-            android:id="@+id/btn_free_mode"
-            android:layout_width="220dp"
-            android:layout_height="52dp"
-            android:text="自由模式"
-            android:textColor="#FFFFFF"
-            android:textSize="17sp"
-            android:textStyle="bold"
-            android:background="@drawable/bg_free_btn"
-            app:backgroundTint="@null"
-            android:elevation="4dp" />
+        <!-- 中间演示棋盘 -->
+        <com.example.myapplication.AnimatedBoardView
+            android:id="@+id/animated_board"
+            android:layout_width="240dp"
+            android:layout_height="240dp"
+            android:layout_marginBottom="24dp" />
 
+        <!-- 底部按钮区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btn_level_mode"
+                android:layout_width="220dp"
+                android:layout_height="52dp"
+                android:text="关卡模式"
+                android:textColor="#FFFFFF"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_level_btn"
+                app:backgroundTint="@null"
+                android:elevation="4dp"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/btn_free_mode"
+                android:layout_width="220dp"
+                android:layout_height="52dp"
+                android:text="自由模式"
+                android:textColor="#FFFFFF"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_free_btn"
+                app:backgroundTint="@null"
+                android:elevation="4dp" />
+
+        </LinearLayout>
     </LinearLayout>
-
-</LinearLayout>
+</FrameLayout>
